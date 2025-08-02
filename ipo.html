@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f172a 0%, #581c87 25%, #7c3aed 50%, #581c87 75%, #0f172a 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background Elements */
+        .bg-animation {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            mix-blend-mode: multiply;
+            filter: blur(60px);
+            opacity: 0.2;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-1 {
+            top: -160px;
+            right: -160px;
+            width: 320px;
+            height: 320px;
+            background: #8b5cf6;
+            animation-delay: 0s;
+        }
+
+        .floating-2 {
+            bottom: -160px;
+            left: -160px;
+            width: 320px;
+            height: 320px;
+            background: #ec4899;
+            animation-delay: 2s;
+        }
+
+        .floating-3 {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 320px;
+            height: 320px;
+            background: #6366f1;
+            opacity: 0.1;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .header-icon {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        .header-icon::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, #8b5cf6, #ec4899);
+            border-radius: 50%;
+            filter: blur(20px);
+            opacity: 0.75;
+        }
+
+        .header-icon-inner {
+            position: relative;
+            background: linear-gradient(45deg, #8b5cf6, #ec4899);
+            padding: 1rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calculator-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            color: white;
+        }
+
+        .main-title {
+            font-size: 3.75rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #ffffff, #e2e8f0, #fbbf24);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+            font-size: 1.25rem;
+            font-weight: 300;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Input Section */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            width: 1.75rem;
+            height: 1.75rem;
+            margin-right: 0.75rem;
+            color: #a855f7;
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 0.75rem;
+            transition: color 0.3s ease;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid #475569;
+            border-radius: 1rem;
+            color: white;
+            font-size: 1.125rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+        }
+
+        .input-field:focus + .input-glow {
+            opacity: 1;
+        }
+
+        .input-glow {
+            position: absolute;
+            inset: 0;
+            border-radius: 1rem;
+            background: linear-gradient(45deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .input-field:focus ~ .input-label {
+            color: #a855f7;
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 1rem;
+            padding: 1rem;
+            backdrop-filter: blur(10px);
+            animation: pulse 2s infinite;
+            display: flex;
+            align-items: center;
+        }
+
+        .error-icon {
+            width: 1rem;
+            height: 1rem;
+            margin-right: 0.5rem;
+            color: #fca5a5;
+        }
+
+        .error-text {
+            color: #fca5a5;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* Results Section */
+        .results-content {
+            text-align: center;
+        }
+
+        .percentage-display {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .percentage-glow {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, #8b5cf6, #ec4899);
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.3;
+        }
+
+        .percentage-text {
+            position: relative;
+            font-size: 5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .status-icon {
+            width: 2rem;
+            height: 2rem;
+            margin-right: 0.75rem;
+        }
+
+        .status-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Progress Ring */
+        .progress-ring-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .progress-ring {
+            width: 12rem;
+            height: 12rem;
+            position: relative;
+        }
+
+        .progress-ring svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-bg {
+            stroke: #374151;
+            stroke-width: 8;
+            fill: transparent;
+        }
+
+        .progress-ring-fill {
+            stroke-width: 8;
+            fill: transparent;
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 1s ease-out;
+            stroke-linecap: round;
+        }
+
+        .progress-ring-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .progress-ring-percentage {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .progress-ring-label {
+            color: #cbd5e1;
+            font-size: 0.875rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.05);
+        }
+
+        .stat-card-present {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .stat-card-present:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        .stat-card-absent {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .stat-card-absent:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 2rem;
+            height: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1);
+        }
+
+        .stat-icon-present {
+            color: #34d399;
+        }
+
+        .stat-icon-absent {
+            color: #f87171;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .stat-label-present {
+            color: #6ee7b7;
+        }
+
+        .stat-label-absent {
+            color: #fca5a5;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value-present {
+            color: #34d399;
+        }
+
+        .stat-value-absent {
+            color: #f87171;
+        }
+
+        .stat-percentage {
+            font-size: 0.875rem;
+        }
+
+        .stat-percentage-present {
+            color: #6ee7b7;
+        }
+
+        .stat-percentage-absent {
+            color: #fca5a5;
+        }
+
+        /* Insights Panel */
+        .insights-panel {
+            backdrop-filter: blur(10px);
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .insights-title {
+            font-weight: 700;
+            color: #a5b4fc;
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+        }
+
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .insights-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .insight-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .insight-dot-excellent { background: #34d399; }
+        .insight-dot-good { background: #60a5fa; }
+        .insight-dot-average { background: #fbbf24; }
+        .insight-dot-poor { background: #f87171; }
+
+        .insight-text {
+            color: #cbd5e1;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            margin-top: 2rem;
+        }
+
+        .dashboard-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .dashboard-card {
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .dashboard-card:hover {
+            transform: scale(1.05);
+        }
+
+        .dashboard-card-total {
+            background: rgba(100, 116, 139, 0.2);
+            border-color: rgba(100, 116, 139, 0.3);
+        }
+
+        .dashboard-card-total:hover {
+            background: rgba(100, 116, 139, 0.3);
+        }
+
+        .dashboard-card-present {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .dashboard-card-present:hover {
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        .dashboard-card-absent {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .dashboard-card-absent:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+
+        .dashboard-card-percentage {
+            background: linear-gradient(45deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .dashboard-card-percentage:hover {
+            background: linear-gradient(45deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3));
+        }
+
+        .dashboard-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-value-total { color: #cbd5e1; }
+        .dashboard-value-present { color: #34d399; }
+        .dashboard-value-absent { color: #f87171; }
+
+        .dashboard-value-percentage {
+            background: linear-gradient(45deg, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dashboard-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .dashboard-label-total { color: #94a3b8; }
+        .dashboard-label-present { color: #6ee7b7; }
+        .dashboard-label-absent { color: #fca5a5; }
+        .dashboard-label-percentage { color: #c4b5fd; }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 0;
+        }
+
+        .empty-icon {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+
+        .empty-icon::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, #8b5cf6, #ec4899);
+            border-radius: 50%;
+            filter: blur(30px);
+            opacity: 0.3;
+        }
+
+        .empty-icon-inner {
+            position: relative;
+            color: #64748b;
+        }
+
+        .calculator-icon-large {
+            width: 5rem;
+            height: 5rem;
+        }
+
+        .empty-text {
+            color: #cbd5e1;
+            font-size: 1.25rem;
+            font-weight: 300;
+        }
+
+        /* Color classes for different attendance levels */
+        .excellent { color: #10b981; }
+        .good { color: #3b82f6; }
+        .average { color: #f59e0b; }
+        .poor { color: #ef4444; }
+
+        @media (max-width: 768px) {
+            .main-title {
+                font-size: 2.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .percentage-text {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="floating-element floating-1"></div>
+        <div class="floating-element floating-2"></div>
+        <div class="floating-element floating-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-icon">
+                <div class="header-icon-inner">
+                    <svg class="calculator-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="9" y2="9"></line>
+                        <line x1="15" y1="9" x2="15" y2="9"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                </div>
+            </div>
+            <h1 class="main-title">Attendance Calculator</h1>
+            <p class="subtitle">Track your academic progress with precision and style</p>
+        </div>
+
+        <div class="main-grid">
+            <!-- Input Form -->
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    Input Details
+                </h2>
+                
+                <div class="input-group">
+                    <label for="totalDays" class="input-label">Total Number of Days</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="number"
+                            id="totalDays"
+                            class="input-field"
+                            placeholder="Enter total days"
+                            min="1"
+                        />
+                        <div class="input-glow"></div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="presentDays" class="input-label">Number of Days Present</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="number"
+                            id="presentDays"
+                            class="input-field"
+                            placeholder="Enter present days"
+                            min="0"
+                        />
+                        <div class="input-glow"></div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="absentDays" class="input-label">Number of Days Absent</label>
+                    <div class="input-wrapper">
+                        <input
+                            type="number"
+                            id="absentDays"
+                            class="input-field"
+                            placeholder="Enter absent days"
+                            min="0"
+                        />
+                        <div class="input-glow"></div>
+                    </div>
+                </div>
+
+                <div id="errorMessage" class="error-message" style="display: none;">
+                    <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                    <span id="errorText" class="error-text"></span>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="glass-card">
+                <h2 class="section-title">
+                    <svg class="section-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline>
+                        <polyline points="17,6 23,6 23,12"></polyline>
+                    </svg>
+                    Attendance Analysis
+                </h2>
+
+                <div id="resultsContent" class="results-content">
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <div class="empty-icon-inner">
+                                <svg class="calculator-icon-large" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                                    <line x1="9" y1="9" x2="9" y2="9"></line>
+                                    <line x1="15" y1="9" x2="15" y2="9"></line>
+                                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="empty-text">Enter your attendance data to see detailed analysis</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="glass-card dashboard" style="display: none;">
+            <h3 class="dashboard-title">Attendance Dashboard</h3>
+            <div class="dashboard-grid">
+                <div class="dashboard-card dashboard-card-total">
+                    <div id="dashboardTotal" class="dashboard-value dashboard-value-total">0</div>
+                    <div class="dashboard-label dashboard-label-total">Total Days</div>
+                </div>
+                <div class="dashboard-card dashboard-card-present">
+                    <div id="dashboardPresent" class="dashboard-value dashboard-value-present">0</div>
+                    <div class="dashboard-label dashboard-label-present">Present Days</div>
+                </div>
+                <div class="dashboard-card dashboard-card-absent">
+                    <div id="dashboardAbsent" class="dashboard-value dashboard-value-absent">0</div>
+                    <div class="dashboard-label dashboard-label-absent">Absent Days</div>
+                </div>
+                <div class="dashboard-card dashboard-card-percentage">
+                    <div id="dashboardPercentage" class="dashboard-value dashboard-value-percentage">0%</div>
+                    <div class="dashboard-label dashboard-label-percentage">Attendance Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AttendanceCalculator {
+            constructor() {
+                this.totalDaysInput = document.getElementById('totalDays');
+                this.presentDaysInput = document.getElementById('presentDays');
+                this.absentDaysInput = document.getElementById('absentDays');
+                this.errorMessage = document.getElementById('errorMessage');
+                this.errorText = document.getElementById('errorText');
+                this.resultsContent = document.getElementById('resultsContent');
+                this.dashboard = document.getElementById('dashboard');
+                
+                this.bindEvents();
+            }
+
+            bindEvents() {
+                [this.totalDaysInput, this.presentDaysInput, this.absentDaysInput].forEach(input => {
+                    input.addEventListener('input', () => this.calculate());
+                });
+            }
+
+            showError(message) {
+                this.errorText.textContent = message;
+                this.errorMessage.style.display = 'flex';
+                this.hideResults();
+            }
+
+            hideError() {
+                this.errorMessage.style.display = 'none';
+            }
+
+            hideResults() {
+                this.resultsContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <div class="empty-icon-inner">
+                                <svg class="calculator-icon-large" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                                    <line x1="9" y1="9" x2="9" y2="9"></line>
+                                    <line x1="15" y1="9" x2="15" y2="9"></line>
+                                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="empty-text">Enter your attendance data to see detailed analysis</p>
+                    </div>
+                `;
+                this.dashboard.style.display = 'none';
+            }
+
+            getAttendanceLevel(percentage) {
+                if (percentage >= 95) return { level: 'excellent', status: 'Outstanding', icon: 'award' };
+                if (percentage >= 90) return { level: 'excellent', status: 'Excellent', icon: 'target' };
+                if (percentage >= 80) return { level: 'good', status: 'Very Good', icon: 'check-circle' };
+                if (percentage >= 70) return { level: 'average', status: 'Good', icon: 'book-open' };
+                if (percentage >= 60) return { level: 'average', status: 'Satisfactory', icon: 'trending-up' };
+                return { level: 'poor', status: 'Needs Improvement', icon: 'x-circle' };
+            }
+
+            getIcon(iconName) {
+                const icons = {
+                    'award': '<path d="m9 12 2 2 4-4"></path><path d="M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z"></path>',
+                    'target': '<circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle>',
+                    'check-circle': '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22,4 12,14.01 9,11.01"></polyline>',
+                    'book-open': '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>',
+                    'trending-up': '<polyline points="23,6 13.5,15.5 8.5,10.5 1,18"></polyline><polyline points="17,6 23,6 23,12"></polyline>',
+                    'x-circle': '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>'
+                };
+                return icons[iconName] || icons['check-circle'];
+            }
+
+            showResults(data) {
+                const attendanceInfo = this.getAttendanceLevel(data.percentage);
+                const circumference = 2 * Math.PI * 40;
+                const strokeDashoffset = circumference - (data.percentage / 100) * circumference;
+
+                this.resultsContent.innerHTML = `
+                    <div class="percentage-display">
+                        <div class="percentage-glow"></div>
+                        <div class="percentage-text ${attendanceInfo.level}">${data.percentage}%</div>
+                    </div>
+                    
+                    <div class="status-container">
+                        <svg class="status-icon ${attendanceInfo.level}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            ${this.getIcon(attendanceInfo.icon)}
+                        </svg>
+                        <div class="status-text ${attendanceInfo.level}">${attendanceInfo.status}</div>
+                    </div>
+
+                    <div class="progress-ring-container">
+                        <div class="progress-ring">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="40" class="progress-ring-bg"></circle>
+                                <circle 
+                                    cx="50" 
+                                    cy="50" 
+                                    r="40" 
+                                    class="progress-ring-fill"
+                                    stroke="url(#gradient)"
+                                    style="stroke-dashoffset: ${strokeDashoffset}"
+                                ></circle>
+                                <defs>
+                                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#8b5cf6" />
+                                        <stop offset="100%" stop-color="#ec4899" />
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div class="progress-ring-center">
+                                <div class="progress-ring-percentage">${data.percentage}%</div>
+                                <div class="progress-ring-label">Attendance</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card stat-card-present">
+                            <div class="stat-header">
+                                <svg class="stat-icon stat-icon-present" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22,4 12,14.01 9,11.01"></polyline>
+                                </svg>
+                                <span class="stat-label stat-label-present">Present Days</span>
+                            </div>
+                            <div class="stat-value stat-value-present">${data.present}</div>
+                            <div class="stat-percentage stat-percentage-present">
+                                ${((data.present / data.total) * 100).toFixed(1)}% of total
+                            </div>
+                        </div>
+
+                        <div class="stat-card stat-card-absent">
+                            <div class="stat-header">
+                                <svg class="stat-icon stat-icon-absent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                                </svg>
+                                <span class="stat-label stat-label-absent">Absent Days</span>
+                            </div>
+                            <div class="stat-value stat-value-absent">${data.absent}</div>
+                            <div class="stat-percentage stat-percentage-absent">
+                                ${((data.absent / data.total) * 100).toFixed(1)}% of total
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insights-panel">
+                        <h3 class="insights-title">Performance Insights</h3>
+                        <div class="insights-grid">
+                            <div class="insight-item">
+                                <div class="insight-dot insight-dot-excellent"></div>
+                                <span class="insight-text">95%+ Outstanding Performance</span>
+                            </div>
+                            <div class="insight-item">
+                                <div class="insight-dot insight-dot-good"></div>
+                                <span class="insight-text">90-94% Excellent Attendance</span>
+                            </div>
+                            <div class="insight-item">
+                                <div class="insight-dot insight-dot-average"></div>
+                                <span class="insight-text">80-89% Very Good Progress</span>
+                            </div>
+                            <div class="insight-item">
+                                <div class="insight-dot insight-dot-poor"></div>
+                                <span class="insight-text">70-79% Room for Improvement</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Update dashboard
+                document.getElementById('dashboardTotal').textContent = data.total;
+                document.getElementById('dashboardPresent').textContent = data.present;
+                document.getElementById('dashboardAbsent').textContent = data.absent;
+                document.getElementById('dashboardPercentage').textContent = `${data.percentage}%`;
+                this.dashboard.style.display = 'block';
+            }
+
+            calculate() {
+                const total = parseInt(this.totalDaysInput.value);
+                const present = parseInt(this.presentDaysInput.value);
+                const absent = parseInt(this.absentDaysInput.value);
+
+                // Clear previous errors
+                this.hideError();
+
+                // Check if all fields are filled
+                if (!total || !present || absent === '' || absent === null) {
+                    this.hideResults();
+                    return;
+                }
+
+                // Validation
+                if (total <= 0) {
+                    this.showError('Total days must be greater than 0');
+                    return;
+                }
+
+                if (present < 0 || absent < 0) {
+                    this.showError('Present and absent days cannot be negative');
+                    return;
+                }
+
+                if (present + absent !== total) {
+                    this.showError('Present days + Absent days must equal Total days');
+                    return;
+                }
+
+                if (present > total || absent > total) {
+                    this.showError('Present or absent days cannot exceed total days');
+                    return;
+                }
+
+                // Calculate percentage
+                const percentage = Math.round((present / total) * 100 * 100) / 100;
+
+                // Show results
+                this.showResults({
+                    total,
+                    present,
+                    absent,
+                    percentage
+                });
+            }
+        }
+
+        // Initialize the calculator when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AttendanceCalculator();
+        });
+    </script>
+</body>
+</html>
